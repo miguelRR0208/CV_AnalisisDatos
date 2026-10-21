@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Miguel Rivera · Portafolio de análisis de datos</title>
+<meta name="description" content="Portafolio de Miguel Esaú Rivera Román: dashboards en Excel con Power Query, SQL y Python aplicados a ventas, calidad de datos y mantenimiento predictivo.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="wrap"><strong>Miguel Rivera</strong>
+<nav><a href="#proyectos">Proyectos</a><a href="#herramientas">Herramientas</a><a href="#contacto">Contacto</a></nav></div></header>
+
+<main class="wrap">
+<section class="hero">
+  <h1>Análisis de datos para decidir mejor</h1>
+  <p class="lead">Soy Miguel Esaú Rivera Román, estudiante de Ingeniería del Software en la Universidad Autónoma de Zacatecas (titulación prevista en 2027). Trabajo con Excel, SQL y Python para convertir datos de ventas, sensores y operación en indicadores claros.</p>
+  <div class="btns">
+    <a class="btn primary" href="#proyectos">Ver proyectos</a>
+    <a class="btn" href="descargas/CV_Miguel_Rivera_Analista_de_Datos.pdf">Descargar CV (PDF)</a>
+    <a class="btn" href="#contacto">Contacto</a>
+  </div>
+</section>
+
+<section id="proyectos">
+  <h2>Proyectos</h2>
+  <p class="sub">Tres proyectos de datos, del más reciente al más antiguo.</p>
+
+  <article class="card" id="gasera">
+    <span class="tag">Excel</span><span class="tag">Power Query</span><span class="tag">Tablas dinámicas</span><span class="tag">MySQL</span><span class="tag">KPIs</span>
+    <h3>Sistema de puntos de una gasera y análisis de sus datos</h3>
+    <p class="meta">Sistema desarrollado de enero a julio de 2026 </p>
+    <p>Desarrollé el sistema completo de una gasera: registra compras, puntos y canjes de clientes, y genera reportes de ventas exportables a Excel y CSV. Después puse la mirada de analista sobre sus datos y construí un dashboard para responder: ¿cuánto se vende?, ¿cuántos clientes se están perdiendo?, ¿cuántos puntos se canjean? y ¿los saldos de los clientes cuadran con su historial?</p>
+    <div class="note"><strong>Datos de prueba simulados.</strong> 300 clientes y 3,000 compras generadas con una semilla fija (octubre 2025 – octubre 2026); incluyen inconsistencias de saldo intencionales para probar la conciliación. No son datos reales de ningún negocio.</div>
+    <div class="kpis">
+      <div class="kpi"><b>240,757</b><span>litros vendidos</span></div>
+      <div class="kpi"><b>2,881</b><span>compras activas</span></div>
+      <div class="kpi"><b>4.0 %</b><span>cancelación</span></div>
+      <div class="kpi"><b>40.8 %</b><span>tasa de canje de puntos</span></div>
+      <div class="kpi"><b>6</b><span>saldos inconsistentes</span></div>
+    </div>
+    <div class="charts" id="charts">
+      <div class="chart"><h4>Los litros mensuales bajan de ≈ 30 mil (dic-2025) a ≈ 16 mil (sep-2026)</h4><svg id="c1" viewBox="0 0 320 170" role="img" aria-label="Litros por mes"></svg></div>
+      <div class="chart"><h4>La tasa de canje sube de 10 % a 68 % en un año</h4><svg id="c2" viewBox="0 0 320 170" role="img" aria-label="Tasa de canje por mes"></svg></div>
+      <div class="chart"><h4>101 de 300 clientes (34 %) llevan más de 90 días sin comprar</h4><svg id="c3" viewBox="0 0 320 170" role="img" aria-label="Clientes por días sin comprar"></svg></div>
+    </div>
+    <p class="meta">Gráficas dibujadas con los mismos totales del dashboard. Octubre de 2025 y de 2026 son meses parciales.</p>
+    <div class="shot"><img src="img/dashboard.png" alt="Captura del dashboard de la gasera en Excel" onerror="this.parentNode.style.display='none'"></div>
+    <div class="cols">
+      <div><strong>El sistema (ene – jul 2026)</strong><ul>
+        <li>Backend, base de datos <b>MySQL</b> y panel web (NestJS, TypeScript, React, Docker).</li>
+        <li>Reportes de ventas y clientes por fecha, cliente y empleado, y KPIs en el panel de administración.</li>
+        <li>Bitácora de auditoría, roles y permisos, respaldos y más de 230 pruebas automatizadas.</li>
+      </ul></div>
+      <div><strong>El análisis (oct 2026)</strong><ul>
+        <li>Datos con <b>Power Query</b> (6 consultas, calendario y cruces entre tablas).</li>
+        <li>Tablas dinámicas con campos calculados (% de cancelación, tasa de canje), segmentaciones y tarjetas de KPI.</li>
+        <li>Hoja de consulta por cliente con <b>BUSCARX</b> e <b>ÍNDICE/COINCIDIR</b>.</li>
+        <li>Consultas en <b>SQL</b> y un script de <b>pandas</b> para detectar anomalías.</li>
+      </ul></div>
+      <div><strong>Qué encontré</strong><ul>
+        <li>El 20 % de los clientes genera ≈ 71 % de los litros (Pareto).</li>
+        <li>6 clientes con saldo distinto al recalculado desde su historial de puntos.</li>
+        <li>La cancelación se mantiene entre 1.5 % y 6.9 % al mes.</li>
+      </ul></div>
+    </div>
+    <details><summary>Ver una consulta SQL (conciliación de saldos)</summary>
+<pre>SELECT c.id, c.user, c.name,
+       c.points AS saldo_almacenado,
+       ROUND(COALESCE(SUM(CASE rt.type WHEN 'REDEEMED' THEN -rt.points
+                          ELSE rt.points END), 0), 2) AS saldo_ledger
+FROM customers c
+LEFT JOIN reward_transactions rt ON rt.customer_id = c.id
+WHERE c.role = 'USER'
+GROUP BY c.id, c.user, c.name, c.points
+HAVING ABS(c.points - saldo_ledger) &gt; 0.005;</pre></details>
+    <div class="btns" style="margin-top:14px">
+      <a class="btn" href="descargas/Dashboard_Gasera.xlsx">Descargar el dashboard (.xlsx)</a>
+      <a class="btn" href="descargas/consultas_gasera.sql">Consultas SQL</a>
+    </div>
+  </article>
+
+  <article class="card" id="fallas">
+    <span class="tag">Python</span><span class="tag">pandas</span><span class="tag">scikit-learn</span><span class="tag">Mantenimiento predictivo</span>
+    <h3>Predicción de fallas en maquinaria industrial</h3>
+    <p class="meta">Samsung Innovation Campus · abril 2025 · equipo de 3 personas</p>
+    <p>Análisis de 10,000 registros de sensores de maquinaria (dataset público de Kaggle, con 3.5 % de fallas): depuración, valores atípicos por rango intercuartílico, distribuciones y correlaciones.</p>
+    <ul>
+      <li>Regresión de la velocidad de rotación con Random Forest, XGBoost y Gradient Boosting (votación suave): <b>MAE ≈ 40 rpm y R² ≈ 0.89</b> en datos de prueba.</li>
+      <li>Clasificación de la falla y su tipo con Random Forest; <b>SMOTE aplicado solo al conjunto de entrenamiento</b> y evaluación sobre datos reales sin balancear, para evitar fuga de información.</li>
+      <li>Segmentación con PCA y K-means.</li>
+    </ul>
+  </article>
+
+  <article class="card" id="sarrca">
+    <span class="tag">Python</span><span class="tag">Django</span><span class="tag">PostgreSQL</span><span class="tag">Docker</span>
+    <h3>SARRCA · monitoreo de calidad del aire</h3>
+    <p class="meta">Proyecto en equipo, UAZ · agosto – diciembre 2026</p>
+    <p>Sistema que recibe lecturas de una red de sensores y las convierte en reportes de calidad del aire.</p>
+    <ul>
+      <li>Levanté requerimientos, diseñé y desarrollé la <b>ingesta automática</b> desde una API en la nube: consulta programada por sensor, normalización de formato y zona horaria, almacenamiento sin duplicados y conciliación semanal.</li>
+      <li>Implementé las reglas de la <b>NOM-025</b> (validez horaria, promedios de 24 h y excedencias) y el índice de calidad del aire para el público (<b>NOM-172</b>), con reportes diario y mensual.</li>
+    </ul>
+  </article>
+</section>
+
+<section id="herramientas">
+  <h2>Herramientas</h2>
+  <div class="grid3" style="margin-top:14px">
+    <div class="card"><strong>Excel</strong><br>Power Query, tablas dinámicas, campos calculados, segmentaciones, BUSCARX, ÍNDICE/COINCIDIR, SUMAR.SI.CONJUNTO, dashboards con KPIs.</div>
+    <div class="card"><strong>SQL</strong><br>SQL Server, MySQL y PostgreSQL: cruces, agregaciones, ventanas y validación de integridad.</div>
+    <div class="card"><strong>Python</strong><br>pandas, NumPy, matplotlib, seaborn, scikit-learn: limpieza, estadística descriptiva, regresión y clasificación.</div>
+  </div>
+  <p class="sub" style="margin-top:16px">Formación: MS SQL Server for Data Analytics (Econodata / Cámara de Comercio de Lima, 2025) · Samsung Innovation Campus 2024, IA y liderazgo (150 h) · MeIA 2025, UNAM.</p>
+</section>
+
+<section id="contacto">
+  <h2>Contacto</h2>
+  <p class="sub">Busco un puesto de practicante en análisis de datos. Escríbeme y con gusto platicamos.</p>
+  <div class="btns">
+    <a class="btn primary" href="mailto:MiguelRiveraRoman2@gmail.com">MiguelRiveraRoman2@gmail.com</a>
+    <a class="btn" href="https://www.linkedin.com/in/rivera-rom%C3%A1n-miguel-esa%C3%BA-b4a842242/">LinkedIn</a>
+    <a class="btn" href="descargas/CV_Miguel_Rivera_Analista_de_Datos.pdf">CV en PDF</a>
+  </div>
+</section>
+</main>
+<footer><div class="wrap">Miguel Esaú Rivera Román · Zacatecas, México</div></footer>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e};
+const meses=['oct-25','nov','dic','ene-26','feb','mar','abr','may','jun','jul','ago','sep','oct-26'];
+const litros=[7645,25016,29978,28299,20809,18721,17001,18442,16257,15338,15929,15649,11674];
+const canje=[10.3,23.1,26.6,26.0,38.8,37.9,50.5,44.2,60.2,53.3,51.6,70.1,67.7];
+function bars(id,labels,vals,fmt,showEvery,max){
+  const s=document.getElementById(id),W=320,H=170,L=34,B=24,T=8,R=6,bw=(W-L-R)/vals.length;
+  for(let i=0;i<=3;i++){const y=T+(H-T-B)*(1-i/3);el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:'currentColor','stroke-opacity':.12},s);el('text',{x:L-4,y:y+3,'text-anchor':'end'},s).textContent=fmt(max*i/3)}
+  vals.forEach((v,i)=>{const h=(H-T-B)*v/max,x=L+i*bw+bw*.18;const r=el('rect',{class:'bar',x,y:H-B-h,width:bw*.64,height:h,rx:2},s);el('title',{},r).textContent=labels[i]+': '+fmt(v);
+    if(i%showEvery===0)el('text',{x:x+bw*.32,y:H-8,'text-anchor':'middle'},s).textContent=labels[i]});
+}
+bars('c1',meses,litros,v=>v>=1000?Math.round(v/1000)+' mil':Math.round(v),2,30000);
+(function(){const s=document.getElementById('c2'),W=320,H=170,L=34,B=24,T=8,R=6,n=canje.length,dx=(W-L-R)/(n-1);
+  for(let i=0;i<=4;i++){const y=T+(H-T-B)*(1-i/4);el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:'currentColor','stroke-opacity':.12},s);el('text',{x:L-4,y:y+3,'text-anchor':'end'},s).textContent=(i*20)+' %'}
+  const pts=canje.map((v,i)=>[L+i*dx,H-B-(H-T-B)*v/80]);
+  el('polyline',{class:'line',points:pts.map(p=>p.join(',')).join(' ')},s);
+  pts.forEach((p,i)=>{const d=el('circle',{class:'dot',cx:p[0],cy:p[1],r:3.5},s);el('title',{},d).textContent=meses[i]+': '+canje[i]+' %';if(i%2===0)el('text',{x:p[0],y:H-8,'text-anchor':i===n-1?'end':'middle'},s).textContent=meses[i]});})();
+bars('c3',['Activo','31-60','61-90','90+','Sin compras'],[90,52,37,101,20],v=>Math.round(v),1,120);
+</script>
+</body>
+</html>
